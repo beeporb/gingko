@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+
+  gingko-server:
+
+    build:
+      context: gingko
+      dockerfile: server.Dockerfile
+
+  gingko-worker:
+
+    build: 
+      context: gingko
+      dockerfile: worker.Dockerfile 
+
+
+  gingko-web:
+
+    build:
+      context: gingko-web
+      dockerfile: web.Dockerfile
+
+    ports:
+      - 80:80
