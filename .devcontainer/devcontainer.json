@@ -34,7 +34,8 @@
 	"customizations": {
 		"vscode": {
 			"extensions": [
-				"eeyore.yapf"
+				"eeyore.yapf",
+				"njpwerner.autodocstring"
 			]
 		}
 	}
