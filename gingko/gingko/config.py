@@ -1,3 +1,6 @@
+"""Module containing functionality for configuring various bits of Gingko with environment
+variables."""
+
 import os
 import pathlib
 
