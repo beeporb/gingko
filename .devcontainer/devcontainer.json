@@ -30,6 +30,13 @@
 			"version": "latest",
 			"dockerDashComposeVersion": "latest"
 		}
+	},
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"eeyore.yapf"
+			]
+		}
 	}
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
