@@ -1,3 +1,6 @@
+"""Module containing functionality pertaining to tracking Extractions in Gingko, specifically
+tracking whether extractions on disk have been seen before or not."""
+
 import abc
 import pathlib
 
@@ -8,13 +11,27 @@ from gingko.server.extraction.model import Extraction, ExtractionType
 
 
 class GingkoTrackingClient(abc.ABC):
+    """Abstract class for a client that tracks the seen-status of different extractions on disk."""
 
     @abc.abstractmethod
     def get_tracked_extractions(self) -> list[Extraction]:
+        """Get all extractions that have been seen by the system.
+
+        Returns:
+            list[Extraction]: List of extractions that have been seen by the system.
+        """
         ...
 
     @abc.abstractmethod
     def check_path_tracked(self, path: pathlib.PurePath) -> bool:
+        """Check if the provided PurePath has been seen before.
+
+        Args:
+            path (pathlib.PurePath): Path to check if it has been seen or not.
+
+        Returns:
+            bool: Whether or not the path has been seen by the system or not.
+        """
         ...
 
     # @abc.abstractmethod
@@ -23,15 +40,43 @@ class GingkoTrackingClient(abc.ABC):
 
     @abc.abstractmethod
     def get_tracked_extraction_data_by_path(self, path: pathlib.PurePath) -> Extraction:
+        """Get a specific extraction by path from the tracker.
+
+        Args:
+            path (pathlib.PurePath): Path to get extraction for.
+
+        Returns:
+            Extraction: Extraction that corresponds to provided path.
+        """
+        ...
+
+    @abc.abstractmethod
+    def get_tracked_extraction_data_by_type(self, type: ExtractionType) -> list[Extraction]:
+        """Get a list of extractions that match a specific type.
+
+        Args:
+            type (ExtractionType): ExtractionType, such as tar, directory etc.
+
+        Returns:
+            list[Extraction]: List of extractions that match this type.
+        """
         ...
 
 
 class RedisGingkoTrackingClient(GingkoTrackingClient):
+    """Implementation of the GingkoTrackingClient abstract class that uses Redis to store the
+    tracking information."""
 
     _REDIS_TRACKING_KEYS_KEY = "gingko-tracking-keys"
     _REDIS_TRACKING_DATA_PREFIX = "gingko-tracking::"
 
     def __init__(self, host: str = GINGKO_REDIS_HOST, port: int = GINGKO_REDIS_PORT) -> None:
+        """Constructor for the class.
+
+        Args:
+            host (str, optional): Hostname where Redis can be found. Defaults to GINGKO_REDIS_HOST.
+            port (int, optional): Port that Reds is running on. Defaults to GINGKO_REDIS_PORT.
+        """
         self.connection = redis.StrictRedis(host=host,
                                             port=port,
                                             decode_responses=True,
