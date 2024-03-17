@@ -3,10 +3,10 @@ from fastapi import APIRouter
 from gingko.server.extraction.model import GetExtractionRequest, GetExtractionResponse, Extraction
 from gingko.server.extraction.tracking import RedisGingkoTrackingClient
 
-router = APIRouter()
+router = APIRouter(prefix="/extraction")
 
 
-@router.get("/extraction/")
+@router.get("/")
 def get_extraction(req: GetExtractionRequest) -> GetExtractionResponse:
 
     tracking_client = RedisGingkoTrackingClient()
