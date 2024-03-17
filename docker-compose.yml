@@ -21,5 +21,9 @@ services:
       context: gingko-web
       dockerfile: web.Dockerfile
 
+  caddy:
+    image: caddy:latest
     ports:
       - 80:80
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro  
