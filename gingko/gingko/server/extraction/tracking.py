@@ -17,9 +17,9 @@ class GingkoTrackingClient(abc.ABC):
     def check_path_tracked(self, path: pathlib.PurePath) -> bool:
         ...
 
-    @abc.abstractmethod
-    def remove_tracking_for_extraction(self, extraction: Extraction) -> bool:
-        ...
+    # @abc.abstractmethod
+    # def remove_tracking_for_extraction(self, extraction: Extraction) -> bool:
+    #     ...
 
     @abc.abstractmethod
     def get_tracked_extraction_data_by_path(self, path: pathlib.PurePath) -> Extraction:
