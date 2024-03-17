@@ -27,3 +27,11 @@ services:
       - 80:80
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro  
+
+  redis:
+    image: redis:latest
+    volumes:
+      - redis:/data
+  
+volumes:
+  redis:
