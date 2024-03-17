@@ -7,24 +7,22 @@ extraction_router = APIRouter(prefix="/extraction")
 
 
 @extraction_router.get("/")
-def get_extraction(req: GetExtractionRequest) -> GetExtractionResponse:
+def get_extraction(req: GetExtractionRequest | None = None) -> GetExtractionResponse:
 
     tracking_client = RedisGingkoTrackingClient()
 
     extractions: list[Extraction] = []
 
-    match req:
+    if not req:
 
-        case req.path:
+        extractions = tracking_client.get_tracked_extractions()
 
-            extractions = tracking_client.get_tracked_extraction_data_by_path(req.path)
+    elif req.path:
 
-        case req.type:
+        extractions = [tracking_client.get_tracked_extraction_data_by_path(req.path)]
 
-            extractions = tracking_client.get_tracked_extraction_data_by_type(req.type)
+    elif req.type:
 
-        case _:
-
-            extractions = tracking_client.get_tracked_extractions()
+        extractions = tracking_client.get_tracked_extraction_data_by_type(req.type)
 
     return GetExtractionResponse(extractions=extractions)
