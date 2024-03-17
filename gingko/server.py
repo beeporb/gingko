@@ -1,1 +1,1 @@
-from gingko.server import api
+from gingko.server.api import api
