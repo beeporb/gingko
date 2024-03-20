@@ -34,9 +34,14 @@ class GingkoTrackingClient(abc.ABC):
         """
         ...
 
-    # @abc.abstractmethod
-    # def remove_tracking_for_extraction(self, extraction: Extraction) -> bool:
-    #     ...
+    @abc.abstractmethod
+    def remove_tracking_for_extraction(self, extraction: Extraction):
+        """Remove a specific extraction from the tracker.
+
+        Args:
+            extraction (Extraction): Extraction to remove from the tracker.
+        """
+        ...
 
     @abc.abstractmethod
     def get_tracked_extraction_data_by_path(self, path: pathlib.PurePath) -> Extraction:
@@ -59,6 +64,15 @@ class GingkoTrackingClient(abc.ABC):
 
         Returns:
             list[Extraction]: List of extractions that match this type.
+        """
+        ...
+
+    @abc.abstractmethod
+    def add_tracking_for_extraction(self, extraction: Extraction) -> None:
+        """Add tracking for an extraction to the tracker.
+
+        Args:
+            extraction (Extraction): Extraction to add to the tracker.
         """
         ...
 
@@ -115,3 +129,27 @@ class RedisGingkoTrackingClient(GingkoTrackingClient):
         return [
             extraction for extraction in tracked_extractions if extraction.type == extraction_type
         ]
+
+    def remove_tracking_for_extraction(self, extraction: Extraction):
+        extraction_path = extraction.path
+
+        if not self.check_path_tracked(extraction_path):
+            return
+
+        tracked_extracton_key = f"{self._REDIS_TRACKING_DATA_PREFIX}{str(extraction_path)}"
+
+        self.connection.delete(tracked_extracton_key)
+        self.connection.srem(self._REDIS_TRACKING_KEYS_KEY, str(extraction_path))
+
+    def add_tracking_for_extraction(self, extraction; Extraction) -> None:
+
+        extraction_path = extraction.path
+        tracked_extraction_key = f"{self._REDIS_TRACKING_DATA_PREFIX}{str(extraction_path)}"
+
+        if self.check_path_tracked(extraction_path):
+            raise Exception("already tracked (make an error for this)")
+
+        self.connection.sadd(self._REDIS_TRACKING_KEYS_KEY, str(extraction_path))
+        self.connection.hset(tracked_extraction_key, mapping=dict(extraction))
+
+
