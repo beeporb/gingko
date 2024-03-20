@@ -141,7 +141,7 @@ class RedisGingkoTrackingClient(GingkoTrackingClient):
         self.connection.delete(tracked_extracton_key)
         self.connection.srem(self._REDIS_TRACKING_KEYS_KEY, str(extraction_path))
 
-    def add_tracking_for_extraction(self, extraction; Extraction) -> None:
+    def add_tracking_for_extraction(self, extraction: Extraction) -> None:
 
         extraction_path = extraction.path
         tracked_extraction_key = f"{self._REDIS_TRACKING_DATA_PREFIX}{str(extraction_path)}"
@@ -151,5 +151,3 @@ class RedisGingkoTrackingClient(GingkoTrackingClient):
 
         self.connection.sadd(self._REDIS_TRACKING_KEYS_KEY, str(extraction_path))
         self.connection.hset(tracked_extraction_key, mapping=dict(extraction))
-
-
