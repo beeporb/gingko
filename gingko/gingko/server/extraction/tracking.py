@@ -149,5 +149,8 @@ class RedisGingkoTrackingClient(GingkoTrackingClient):
         if self.check_path_tracked(extraction_path):
             raise Exception("already tracked (make an error for this)")
 
+        extraction_dict = dict(extraction)
+        extraction_dict["path"] = str(extraction.path)
+
         self.connection.sadd(self._REDIS_TRACKING_KEYS_KEY, str(extraction_path))
-        self.connection.hset(tracked_extraction_key, mapping=dict(extraction))
+        self.connection.hset(tracked_extraction_key, mapping=extraction_dict)
