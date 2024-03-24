@@ -25,7 +25,7 @@ class GingkoFileSystemEventHandler(FileSystemEventHandler):
     def __init__(self, gingko_tracking_client: GingkoTrackingClient) -> None:
         self.gingko_tracking_client = gingko_tracking_client
 
-    def handle_zip_extracton_file(self, zip_extraction: pathlib.Path) -> Extraction:
+    def handle_zip_extraction_file(self, zip_extraction: pathlib.Path) -> Extraction:
 
         with zipfile.ZipFile(zip_extraction, "r") as z_fp:
 
@@ -79,7 +79,7 @@ class GingkoFileSystemEventHandler(FileSystemEventHandler):
 
             case "zip":
 
-                extraction = self.handle_zip_extracton_file(event_file_path)
+                extraction = self.handle_zip_extraction_file(event_file_path)
 
             case _:
 
