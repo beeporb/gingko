@@ -1,9 +1,10 @@
-:80 {
-    handle_path /api/* {
+app.localhost:80 {
+    handle_path /api* {
         reverse_proxy gingko-server:8080
     }
 
     handle {
         reverse_proxy gingko-web:80
     }
+
 }
