@@ -8,7 +8,6 @@ from watchdog.observers import Observer
 from watchdog.events import FileSystemEvent, FileSystemEventHandler, FileCreatedEvent, DirCreatedEvent
 
 from gingko.config import GINGKO_INPUT_DIR
-from gingko.log import init_logger
 from gingko.server.extraction.model import Extraction
 from gingko.server.extraction.tracking import GingkoTrackingClient
 
