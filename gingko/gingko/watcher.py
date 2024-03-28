@@ -56,11 +56,6 @@ class GingkoFileSystemEventHandler(FileSystemEventHandler):
     def handle_potential_extraction_file(self, event: FileCreatedEvent) -> None:
         event_file_path = pathlib.Path(event.src_path).resolve()
 
-        if event_file_path.parent != GINGKO_INPUT_DIR:
-            logging.info("skipping file %s as it looks like a component of an extraction directory",
-                         event_file_path)
-            return
-
         file_extension = "".join(event_file_path.suffixes)
 
         if file_extension not in self._VALID_FILE_EXTRACTION_EXTENSIONS:
@@ -93,12 +88,6 @@ class GingkoFileSystemEventHandler(FileSystemEventHandler):
     def handle_potential_extraction_directory(self, event: DirCreatedEvent) -> None:
         event_directory_path = pathlib.Path(event.src_path).resolve()
 
-        if event_directory_path.parent != GINGKO_INPUT_DIR:
-            logging.info(
-                "skipping directory %s as it looks like a component of a different directory "
-                "extraction", event_directory_path)
-            return
-
         extraction = self.handle_directory_extraction(event_directory_path)
 
         logging.info("picked up and adding tracking for new %s extraction: %s (%d files)",
@@ -123,7 +112,7 @@ class GingkoDirectoryWatcher:
             self.gingko_tracking_client)
 
         self.obs = Observer()
-        self.obs.schedule(self.gingko_file_system_event_handler, self.watch_dir, recursive=True)
+        self.obs.schedule(self.gingko_file_system_event_handler, self.watch_dir, recursive=False)
 
     def start(self) -> None:
         logging.info("starting extraction directory watcher (watching: %s)", self.watch_dir)
