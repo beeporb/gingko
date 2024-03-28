@@ -30,6 +30,22 @@ services:
     image: redis:latest
     volumes:
       - redis:/data
+
+  elastic:
+    image: elasticsearch:8.13.0
+    ports:
+      - 9200:9200
+      - 9300:9300
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+
+  kibana:
+    image: kibana:8.13.0
+    ports:
+      - 5601:5601
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elastic:9200
   
 volumes:
   redis:
