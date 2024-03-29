@@ -1,3 +1,5 @@
+"""Module containing functionality for the directory watcher."""
+
 import logging
 import pathlib
 import tarfile

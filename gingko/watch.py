@@ -1,3 +1,5 @@
+"""Entrypoint for Gingko Directory Watcher."""
+
 from gingko.config import GINGKO_INPUT_DIR
 from gingko.log import init_logger
 from gingko.server.extraction.tracking import RedisGingkoTrackingClient
