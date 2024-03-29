@@ -27,3 +27,13 @@ class GetExtractionRequest(BaseModel):
 class GetExtractionResponse(BaseModel):
     """Model for the GET /extraction response."""
     extractions: list[Extraction]
+
+
+class DeleteExtractionRequest(BaseModel):
+    """Model for the DELETE /extraction request."""
+    path: pathlib.PurePath
+
+
+class DeleteExtractionResponse(BaseModel):
+    """Model for the DELETE /extraction response."""
+    ...
