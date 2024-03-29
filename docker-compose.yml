@@ -1,5 +1,14 @@
 services:
 
+  gingko-watcher:
+    build:
+      context: gingko
+      dockerfile: watcher.Dockerfile
+    
+    volumes:
+      - ./data:/mnt/data:ro
+      - ./logs:/var/log/gingko
+
   gingko-server:
 
     build:
