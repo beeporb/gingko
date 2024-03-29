@@ -7,7 +7,20 @@ import pathlib
 import redis
 
 from gingko.config import GINGKO_REDIS_HOST, GINGKO_REDIS_PORT
+from gingko.errors import GingkoError
 from gingko.server.extraction.model import Extraction, ExtractionType
+
+
+class GingkoTrackingError(GingkoError):
+    ...
+
+
+class ExtractionAlreadyTrackedError(GingkoTrackingError):
+
+    def __init__(self, extraction: Extraction) -> None:
+        self.extraction = extraction
+
+        super().__init__(f"Extraction at path {extraction.path} already tracked.")
 
 
 class GingkoTrackingClient(abc.ABC):
@@ -182,13 +195,13 @@ class RedisGingkoTrackingClient(GingkoTrackingClient):
 
         Raises:
             Exception: _description_
-        """ 
+        """
 
         extraction_path = extraction.path
         tracked_extraction_key = f"{self._REDIS_TRACKING_DATA_PREFIX}{str(extraction_path)}"
 
         if self.check_path_tracked(extraction_path):
-            raise Exception("already tracked (make an error for this)")
+            raise ExtractionAlreadyTrackedError(extraction)
 
         extraction_dict = dict(extraction)
         extraction_dict["path"] = str(extraction.path)
