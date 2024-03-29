@@ -9,7 +9,7 @@ from watchdog.events import FileSystemEvent, FileSystemEventHandler, FileCreated
 
 from gingko.config import GINGKO_INPUT_DIR
 from gingko.server.extraction.model import Extraction
-from gingko.server.extraction.tracking import GingkoTrackingClient
+from gingko.server.extraction.tracking import GingkoTrackingClient, ExtractionAlreadyTrackedError
 
 
 class GingkoFileSystemEventHandler(FileSystemEventHandler):
@@ -83,7 +83,13 @@ class GingkoFileSystemEventHandler(FileSystemEventHandler):
         logging.info("picked up and adding tracking for new %s extraction: %s (%d files)",
                      extraction.type, extraction.path, extraction.files)
 
-        self.gingko_tracking_client.add_tracking_for_extraction(extraction)
+        try:
+
+            self.gingko_tracking_client.add_tracking_for_extraction(extraction)
+
+        except ExtractionAlreadyTrackedError as e:
+
+            logging.warning("skipping extraction %s, already in tracker", extraction.path)
 
     def handle_potential_extraction_directory(self, event: DirCreatedEvent) -> None:
         event_directory_path = pathlib.Path(event.src_path).resolve()
