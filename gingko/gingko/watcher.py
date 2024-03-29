@@ -13,6 +13,7 @@ from gingko.server.extraction.tracking import GingkoTrackingClient, ExtractionAl
 
 
 class GingkoFileSystemEventHandler(FileSystemEventHandler):
+    """File system event handler for the Gingko system, specifically the watcher."""
 
     _VALID_FILE_EXTRACTION_EXTENSIONS: list[str] = [".tar", ".tar.gz", ".zip"]
     _FILE_EXTRACTION_EXTENSION_TO_EXTRACTION_TYPE_MAP = {
@@ -22,9 +23,23 @@ class GingkoFileSystemEventHandler(FileSystemEventHandler):
     }
 
     def __init__(self, gingko_tracking_client: GingkoTrackingClient) -> None:
+        """Contstructor for the GingkoFileSystemEventHandler.
+
+        Args:
+            gingko_tracking_client (GingkoTrackingClient): Tracking client to use when new
+            extractions are encountered by the watcher.
+        """
         self.gingko_tracking_client = gingko_tracking_client
 
     def handle_zip_extraction_file(self, zip_extraction: pathlib.Path) -> Extraction:
+        """Handler for an extraction of type Zip.
+
+        Args:
+            zip_extraction (pathlib.Path): Path to Zip extraction.
+
+        Returns:
+            Extraction: Extraction derived from zip path.
+        """
 
         with zipfile.ZipFile(zip_extraction, "r") as z_fp:
 
@@ -34,6 +49,14 @@ class GingkoFileSystemEventHandler(FileSystemEventHandler):
                               files=len(z_fp.filelist))
 
     def handle_tar_extraction_file(self, tar_extraction: pathlib.Path) -> Extraction:
+        """Hanlder for an extraction of type Tar.
+
+        Args:
+            tar_extraction (pathlib.Path): Path to Tar extraction.
+
+        Returns:
+            Extraction: Extraction derived from tar file path.
+        """
 
         mode = "r:" if tar_extraction.suffix == ".tar" else "r:gz"
 
@@ -45,6 +68,14 @@ class GingkoFileSystemEventHandler(FileSystemEventHandler):
                               files=len(t_fp.getmembers()))
 
     def handle_directory_extraction(self, directory_extraction: pathlib.Path) -> Extraction:
+        """Handler for extractions of type directory.
+
+        Args:
+            directory_extraction (pathlib.Path): Directory path for extraction.
+
+        Returns:
+            Extraction: Extraction derived from provided directory.
+        """
 
         files = len(list(directory_extraction.glob("**/*")))
 
@@ -54,6 +85,14 @@ class GingkoFileSystemEventHandler(FileSystemEventHandler):
                           files=files)
 
     def handle_potential_extraction_file(self, event: FileCreatedEvent) -> None:
+        """Handler for a file that has been encountered that could be an extraction.
+
+        Args:
+            event (FileCreatedEvent): Event for a file being moved into the watched directory.
+
+        Raises:
+            NotImplemented: Raised in the event that there is no valid handler for that file type.
+        """
         event_file_path = pathlib.Path(event.src_path).resolve()
 
         file_extension = "".join(event_file_path.suffixes)
@@ -92,6 +131,11 @@ class GingkoFileSystemEventHandler(FileSystemEventHandler):
             return
 
     def handle_potential_extraction_directory(self, event: DirCreatedEvent) -> None:
+        """Handler for a directory that has been encountered that could be an extraction.
+
+        Args:
+            event (DirCreatedEvent): Event for when a directory is moved into the watched directory.
+        """
         event_directory_path = pathlib.Path(event.src_path).resolve()
 
         extraction = self.handle_directory_extraction(event_directory_path)
@@ -108,6 +152,11 @@ class GingkoFileSystemEventHandler(FileSystemEventHandler):
             return
 
     def on_created(self, event: FileSystemEvent) -> None:
+        """Handler for all file system events, of type FileCreatedEvent of DirCreatedEvent.
+
+        Args:
+            event (FileSystemEvent): The file system event.
+        """
         if isinstance(event, FileCreatedEvent):
             self.handle_potential_extraction_file(event)
         elif isinstance(event, DirCreatedEvent):
@@ -115,9 +164,17 @@ class GingkoFileSystemEventHandler(FileSystemEventHandler):
 
 
 class GingkoDirectoryWatcher:
+    """Class that implements a directory watcher, that watches for new extractions in Gingko."""
 
     def __init__(self, watch_dir: pathlib.Path,
                  gingko_tracking_client: GingkoTrackingClient) -> None:
+        """Constructor for directory watcher.
+
+        Args:
+            watch_dir (pathlib.Path): Directory to watch.
+            gingko_tracking_client (GingkoTrackingClient): Tracking client to use to track new
+            extractions.
+        """
         self.watch_dir = watch_dir
         self.gingko_tracking_client = gingko_tracking_client
         self.gingko_file_system_event_handler = GingkoFileSystemEventHandler(
@@ -127,6 +184,7 @@ class GingkoDirectoryWatcher:
         self.obs.schedule(self.gingko_file_system_event_handler, self.watch_dir, recursive=False)
 
     def start(self) -> None:
+        """Starts the watcher's watch."""
         logging.info("starting extraction directory watcher (watching: %s)", self.watch_dir)
 
         self.obs.start()
