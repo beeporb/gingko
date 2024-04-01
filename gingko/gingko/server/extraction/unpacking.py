@@ -35,30 +35,6 @@ class UnpackedExtractionObject(pydantic.BaseModel):
 
 class ExtractionUnpacker(abc.ABC):
 
-    def generate_object_from_path(self, unpacked_object: pathlib.Path) -> UnpackedExtractionObject:
-        if unpacked_object.is_dir():
-
-            return UnpackedExtractionObject(
-                type="directory", path=self._generate_extraction_reL_path(unpacked_object))
-
-        else:
-
-            file_content = unpacked_object.read_bytes()
-            md5_hash = hashlib.md5(file_content).hexdigest()
-            sha1_hash = hashlib.sha1(file_content).hexdigest()
-            ssdeep_hash = ssdeep.hash(file_content)
-            size = len(file_content)
-
-            return UnpackedExtractionObject(
-                type="file",
-                path=self._generate_extraction_reL_path(unpacked_object),
-                metadata={
-                    "md5": md5_hash,
-                    "sha1": sha1_hash,
-                    "size": size,
-                    "ssdeep": ssdeep_hash
-                })
-
     @abc.abstractmethod
     def unpack_extraction(self, extraction: Extraction) -> UnpackedExtractionObject:
         ...
@@ -66,7 +42,7 @@ class ExtractionUnpacker(abc.ABC):
 
 class DirectoryExtractionUnpacker(ExtractionUnpacker):
 
-    def _generate_extraction_reL_path(extraction_path: pathlib.PurePath,
+    def _generate_extraction_rel_path(self, extraction_path: pathlib.PurePath,
                                       object_path: pathlib.PurePath) -> pathlib.PurePath:
         return pathlib.Path("/") / object_path.relative_to(extraction_path)
 
@@ -76,7 +52,35 @@ class DirectoryExtractionUnpacker(ExtractionUnpacker):
         extraction_path = pathlib.Path(extraction.path)
 
         for unpacked_object in extraction_path.glob("**/*"):
-            unpacked_extraction_objects.append(self.generate_object_from_path(unpacked_object))
+
+            unpacked_obj: UnpackedExtractionObject | None = None
+
+            if unpacked_object.is_dir():
+
+                unpacked_obj = UnpackedExtractionObject(type="directory",
+                                                        path=self._generate_extraction_rel_path(
+                                                            extraction_path, unpacked_object),
+                                                        metadata={})
+
+            else:
+
+                file_content = unpacked_object.read_bytes()
+                md5_hash = hashlib.md5(file_content).hexdigest()
+                sha1_hash = hashlib.sha1(file_content).hexdigest()
+                ssdeep_hash = ssdeep.hash(file_content)
+                size = len(file_content)
+
+                unpacked_obj = UnpackedExtractionObject(type="file",
+                                                        path=self._generate_extraction_rel_path(
+                                                            extraction_path, unpacked_object),
+                                                        metadata={
+                                                            "md5": md5_hash,
+                                                            "sha1": sha1_hash,
+                                                            "size": size,
+                                                            "ssdeep": ssdeep_hash
+                                                        })
+
+            unpacked_extraction_objects.append(unpacked_obj)
 
         return unpacked_extraction_objects
 
@@ -105,7 +109,8 @@ class TarExtractionUnpacker(ExtractionUnpacker):
                 size = len(member_content)
 
                 extraction_object = UnpackedExtractionObject(type="file",
-                                                             path=member.path,
+                                                             path=pathlib.PurePath("/") /
+                                                             member.path,
                                                              metadata={
                                                                  "md5": md5_hash,
                                                                  "sha1": sha1_hash,
@@ -115,7 +120,10 @@ class TarExtractionUnpacker(ExtractionUnpacker):
 
             else:
 
-                extraction_object = UnpackedExtractionObject(type="directory", path=member.path)
+                extraction_object = UnpackedExtractionObject(type="directory",
+                                                             path=pathlib.PurePath("/") /
+                                                             member.path,
+                                                             metadata={})
 
             unpacked_extraction_objects.append(extraction_object)
 
@@ -138,7 +146,10 @@ class ZipExtractionUnpacker(ExtractionUnpacker):
 
             if member.is_dir():
 
-                extraction_object = UnpackedExtractionObject(type="directory", path=member.filename)
+                extraction_object = UnpackedExtractionObject(type="directory",
+                                                             path=pathlib.PurePath("/") /
+                                                             member.filename,
+                                                             metadata={})
 
             else:
 
@@ -150,7 +161,8 @@ class ZipExtractionUnpacker(ExtractionUnpacker):
                 size = len(member_content)
 
                 extraction_object = UnpackedExtractionObject(type="file",
-                                                             path=member.path,
+                                                             path=pathlib.PurePath("/") /
+                                                             member.filename,
                                                              metadata={
                                                                  "md5": md5_hash,
                                                                  "sha1": sha1_hash,
