@@ -14,3 +14,5 @@ GINGKO_REDIS = os.getenv("GINGKO_REDIS", f"redis://{GINGKO_REDIS_HOST}:{GINGKO_R
 GINGKO_ELASTIC_HOST = os.getenv("GINGKO_ELASTIC_HOST", "elastic")
 GINGKO_ELASTIC_PORT = os.getenv("GINGKO_ELASTIC_PORT", "9200")
 GINGKO_ELASTIC = os.getenv("GINGKO_ELASTIC", f"http://{GINGKO_ELASTIC_HOST}:{GINGKO_ELASTIC_PORT}")
+GINGKO_ELASTIC_FILE_METADATA_INDEX = os.getenv("GINGKO_ELASTIC_FILE_METADATA_INDEX",
+                                               "gingko-filestore")
